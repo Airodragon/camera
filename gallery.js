@@ -27,31 +27,44 @@ setTimeout(() => {
                 <div class="delete action-btn">Delete</div>
                 `;
                 galleryCont.appendChild(mediaElem);
-            
+
 
                 let deleteBtn = mediaElem.querySelector(".delete");
-                deleteBtn.addEventListener("click",(e)=>{
+                deleteBtn.addEventListener("click", (e) => {
                     let id = e.target.parentElement.getAttribute("id");
                     // let id = mediaElem.id;
-                    if(id.slice(0, 3)==="vid"){
+                    if (id.slice(0, 3) === "vid") {
                         let videoTransaction = db.transaction("video", "readwrite");
                         let videoStore = videoTransaction.objectStore("video");
                         videoStore.delete(id);
                     }
-                    else if(id.slice(0, 3)==="img"){
+                    else if (id.slice(0, 3) === "img") {
                         let imageTransaction = db.transaction("image", "readwrite");
                         let imageStore = imageTransaction.objectStore("image");
                         imageStore.delete(id);
                     }
-                
+
                     //UI REMOVAL
                     e.target.parentElement.remove()
-                
+
                 })
                 let downloadBtn = mediaElem.querySelector(".download");
-                downloadBtn.addEventListener("click", downloadListener())
-            
-            
+                downloadBtn.addEventListener("click", (e) => {
+                    let id = e.target.parentElement.getAttribute("id");
+                    let videoDBTransaction = db.transaction("video", "readwrite");
+                    let videoStore = videoDBTransaction.objectStore("video");
+                    let videoRequest = videoStore.get(id);
+
+                    videoRequest.onsuccess = (e) => {
+                        let videoResult = videoRequest.result;
+                        let videoURL = URL.createObjectURL(videoResult.blobData);
+                        let a = document.createElement("a");
+                        a.href = videoURL;
+                        a.download = "stream.mp4"
+                        a.click();
+                    }
+
+                });
             })
         }
 
@@ -67,7 +80,7 @@ setTimeout(() => {
             imageResult.forEach((imageObj) => {
                 let mediaElem = document.createElement("div");
                 mediaElem.setAttribute("class", "media-cont");
-                mediaElem.setAttribute("id",imageObj.id);
+                mediaElem.setAttribute("id", imageObj.id);
 
                 let url = imageObj.url;
                 console.log(imageObj);
@@ -88,38 +101,42 @@ setTimeout(() => {
 
 
                 let deleteBtn = mediaElem.querySelector(".delete");
-                deleteBtn.addEventListener("click",(e)=>{
+                deleteBtn.addEventListener("click", (e) => {
                     let id = e.target.parentElement.getAttribute("id");
                     // let id = mediaElem.id;
-                    if(id.slice(0, 3)==="vid"){
+                    if (id.slice(0, 3) === "vid") {
                         let videoTransaction = db.transaction("video", "readwrite");
                         let videoStore = videoTransaction.objectStore("video");
                         videoStore.delete(id);
                     }
-                    else if(id.slice(0, 3)==="img"){
+                    else if (id.slice(0, 3) === "img") {
                         let imageTransaction = db.transaction("image", "readwrite");
                         let imageStore = imageTransaction.objectStore("image");
                         imageStore.delete(id);
                     }
-                
+
                     //UI REMOVAL
                     e.target.parentElement.remove()
-                
+
                 })
                 let downloadBtn = mediaElem.querySelector(".download");
-                downloadBtn.addEventListener("click", downloadListener())
+                downloadBtn.addEventListener("click", (e) => {
+                    let id = e.target.parentElement.getAttribute("id");
+                    let imageDBTransaction = db.transaction("image", "readonly");
+                    let imageStore = imageDBTransaction.objectStore("image");
+                    let imageRequest = imageStore.get(id);
+
+                    imageRequest.onsuccess = (e) => {
+                        let imageResult = imageRequest.result;
+                        let a = document.createElement("a");
+                        a.href = imageResult.url;
+                        a.download = "image.jpg"
+                        a.click();
+                    }
+                })
             })
         }
 
 
     }
 }, 100)
-
-
-// UI REMOVE 
-function deleteListener(e){
-  
-}
-function downloadListener(){
-
-}
